@@ -1,6 +1,6 @@
 {
   "name": "jira-ai-bug",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Link Jira Bug issues, get AI root-cause analysis and fix suggestions, generate fix reports.",
   "bin": {
     "jira-ai-bug": "./bin/cli.js"

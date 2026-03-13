@@ -9,9 +9,43 @@ const { getBugIssue } = require('./jiraClient.js');
 const { searchRepo, formatSearchResultsForPrompt } = require('./repoSearch.js');
 const { collectDiffContext, REPO_ROOT } = require('./gitContext.js');
 const { analyze } = require('./aiAnalyzer.js');
-const { writeReport } = require('./reportWriter.js');
+const { writeReport, OUTPUT_DIR } = require('./reportWriter.js');
 
 const CACHE_DIR = path.join(REPO_ROOT, '.jira-ai-analysis');
+
+/** Write a prompt file for Cursor built-in AI: open this file, select all, then ask Cursor to analyze. */
+function writeCursorPromptFile(jiraKey, issue, codeSnippetsText, diffContext) {
+  if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  const promptPath = path.join(OUTPUT_DIR, `${jiraKey.replace(/[^A-Za-z0-9-]/g, '')}-analyze-prompt.md`);
+  const parts = [
+    '<!-- 用 Cursor 打开本文件，选中全文，在 Chat 里说：请根据以下 Jira Bug 与代码上下文分析根因并给出修改建议 -->',
+    '',
+    '# Jira Bug',
+    `- **Key**: ${issue.key}`,
+    `- **Summary**: ${issue.summary}`,
+    `- **Status**: ${issue.status}`,
+    '',
+    '## Description',
+    issue.description || '(none)',
+    '',
+    '## Comments',
+    issue.comments.length ? issue.comments.map((c) => `- [${c.author}] ${c.body}`).join('\n') : '(none)',
+    '',
+    '## Repo code snippets (keyword search)',
+    codeSnippetsText,
+    '',
+    '## Git context',
+    `- **Branch**: ${diffContext.branch}`,
+    `- **Changed files**: ${diffContext.changedFiles.length ? diffContext.changedFiles.join(', ') : '(none)'}`,
+    '',
+    '### Diff (vs HEAD)',
+    '```diff',
+    diffContext.diff === '(no local changes)' ? '(no local changes)' : diffContext.diff,
+    '```',
+  ];
+  fs.writeFileSync(promptPath, parts.join('\n'), 'utf8');
+  return promptPath;
+}
 
 function getCommandAndKey() {
   const cmd = process.argv[2];
@@ -92,6 +126,10 @@ async function runAnalyze(jiraKey, noAi) {
       console.log('\nDiff (first 2000 chars):\n' + diffContext.diff.slice(0, 2000) + (diffContext.diff.length > 2000 ? '\n...' : ''));
     }
     analysis.suspectedFiles = files;
+    const promptPath = writeCursorPromptFile(jiraKey, issue, codeSnippetsText, diffContext);
+    console.log('\n--- 用 Cursor 内置 AI 分析 ---');
+    console.log('已生成: ' + promptPath);
+    console.log('用 Cursor 打开该文件 → 选中全文(Ctrl+A) → 在 Chat 里说：「请根据以上 Jira Bug 与代码上下文分析根因并给出修改建议」');
   } else {
     console.log('Calling AI for root cause and fix suggestions...');
     try {

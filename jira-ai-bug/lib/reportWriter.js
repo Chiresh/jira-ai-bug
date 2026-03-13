@@ -7,6 +7,7 @@ const path = require('path');
 const { REPO_ROOT } = require('./gitContext.js');
 
 const OUTPUT_DIR = path.join(REPO_ROOT, 'docs', 'jira-fixes');
+// Expose for writeCursorPromptFile in index.js
 
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) {

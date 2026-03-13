@@ -62,6 +62,8 @@ npx jira-ai-bug report PD-17851
 
 Output: `docs/jira-fixes/PD-17851-fix.md` with Jira key, summary, root cause, suggested fix, changed files (from `git diff --name-only`), and verification section.
 
+**When using `--no-ai`**, a prompt file `docs/jira-fixes/<KEY>-analyze-prompt.md` is also generated. Open it in [Cursor](https://cursor.com), select all, and ask the built-in AI: “请根据以上 Jira Bug 与代码上下文分析根因并给出修改建议” to get analysis without an external API key.
+
 ### With npm scripts
 
 In `package.json`:
