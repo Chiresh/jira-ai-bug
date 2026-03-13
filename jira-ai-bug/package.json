@@ -1,0 +1,23 @@
+{
+  "name": "jira-ai-bug",
+  "version": "1.0.0",
+  "description": "Link Jira Bug issues, get AI root-cause analysis and fix suggestions, generate fix reports.",
+  "bin": {
+    "jira-ai-bug": "./bin/cli.js"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "keywords": [
+    "jira",
+    "bug",
+    "ai",
+    "analysis",
+    "fix-report"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Cherish/jira-ai-bug.git"
+  }
+}
